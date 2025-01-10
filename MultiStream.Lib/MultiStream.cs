@@ -42,7 +42,7 @@ namespace MultiStream.Lib
         {
             var current = 0;
 
-            while(current <= _index)
+            while (current <= _index)
             {
                 _streams[current++].Flush();
             }
@@ -123,23 +123,34 @@ namespace MultiStream.Lib
 
                 var accum = 0L;
 
+                _index = -1;
                 for (var i = 0; i < _streams.Length; i++)
                 {
                     var current = _streams[i];
+                    if (value >= accum)
+                    {
+                        if (value - accum > current.Length)
+                        {
+                            current.Position = current.Length - 1;
+                        }
+                        else
+                        {
+                            current.Position = value - accum;
+                        }
+                    }
+                    else
+                    {
+                        current.Position = 0;
+                    }
 
                     accum += current.Length;
 
-                    if (accum > value)
+                    if (accum > value && _index == -1)
                     {
-                        _position = value;
-
                         _index = i;
-
-                        _streams[_index].Position = _streams[_index].Length - (accum - value);
-
-                        break;
                     }
                 }
+                _position = value;
             }
 
             return _position;

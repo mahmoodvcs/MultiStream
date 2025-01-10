@@ -176,6 +176,73 @@ namespace MultiStream.Tests
             Assert.AreEqual("hello worldgoodbye world", output);
         }
 
+        [TestMethod]
+        public void MultiStreamSeek()
+        {
+            var ms1 = GetStream("hello world");
+
+            var ms2 = GetStream("goodbye world");
+
+            var s = new Lib.MultiStream(ms1, ms2);
+
+            var reader = new StreamReader(s);
+
+            var output = reader.ReadToEnd();
+
+            Assert.AreEqual("hello worldgoodbye world", output);
+
+            s.Seek(0, SeekOrigin.Begin);
+            reader = new StreamReader(s);
+
+            output = reader.ReadToEnd();
+
+            Assert.AreEqual("hello worldgoodbye world", output);
+
+            s.Seek(6, SeekOrigin.Begin);
+            reader = new StreamReader(s);
+
+            output = reader.ReadToEnd();
+            Assert.AreEqual("worldgoodbye world", output);
+
+            s.Seek(12, SeekOrigin.Begin);
+            reader = new StreamReader(s);
+
+            output = reader.ReadToEnd();
+            Assert.AreEqual("oodbye world", output);
+        }
+
+        [TestMethod]
+        public void ThreeStreamsSeek()
+        {
+            var ms1 = GetStream("hello world");
+
+            var ms2 = GetStream(" welcome ");
+            var ms3 = GetStream("goodbye world");
+
+            var s = new Lib.MultiStream(ms1, ms2, ms3);
+
+            var reader = new StreamReader(s);
+
+            var output = reader.ReadToEnd();
+
+            Assert.AreEqual("hello world welcome goodbye world", output);
+
+            s.Seek(15, SeekOrigin.Begin);
+            reader = new StreamReader(s);
+
+            output = reader.ReadToEnd();
+            Assert.AreEqual("come goodbye world", output);
+
+            s.Seek(23, SeekOrigin.Begin);
+            reader = new StreamReader(s);
+
+            output = reader.ReadToEnd();
+            Assert.AreEqual("dbye world", output);
+
+            s.Seek(40, SeekOrigin.Begin);
+            Assert.AreEqual(s.Position, s.Length - 1);
+        }
+
         private static MemoryStream GetStream(string msg)
         {
             var ms = new MemoryStream();
